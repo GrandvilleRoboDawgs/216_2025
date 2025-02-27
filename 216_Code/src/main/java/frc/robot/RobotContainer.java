@@ -32,8 +32,8 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandPS4Controller joystick = new CommandPS4Controller(0);
-    private final CommandPS4Controller operator = new CommandPS4Controller(1);
+    private final CommandPS4Controller joystick = new CommandPS4Controller(1);
+    // private final CommandPS4Controller operator = new CommandPS4Controller(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -53,8 +53,8 @@ public class RobotContainer {
             )
         );
 
-        joystick.cross().whileTrue(drivetrain.applyRequest(() -> brake));
-        joystick.circle().whileTrue(drivetrain.applyRequest(() ->
+        joystick.R3().whileTrue(drivetrain.applyRequest(() -> brake));
+        joystick.L3().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 

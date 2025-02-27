@@ -22,6 +22,17 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
 
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+// import com.revrobotics.spark.SparkMax;
+// import com.revrobotics.spark.SparkBase;
+// import com.revrobotics.spark.SparkFlex;
+// import com.revrobotics.spark.SparkLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -34,9 +45,17 @@ public class Robot extends TimedRobot {
   Spark Wrist = new Spark(9);
   Spark Skullcrusher = new Spark(7);
   Spark Algae = new Spark(6);
-  PWMSparkMax Elevator = new PWMSparkMax(15);
   TalonFX Torquer = new TalonFX(13);
   TalonFX AlgaeArm = new TalonFX(14);
+  SparkMax elevatorMotor;
+
+
+  // // private CANSparkMax Elevator;
+  // SparkMax Elevator = new SparkMax(15, MotorType.kBrushless);
+    //Encoders
+    Encoder skullcrushEncoder = new Encoder(0,1);
+    Encoder elevatorEncoder = new Encoder(2, 3);
+    Encoder wristEncoder = new Encoder(4, 5);
   private Command m_autonomousCommand;
   // private final Joystick operator = new Joystick(0);
   // private final Joystick driver = new Joystick(1);
@@ -45,6 +64,10 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    elevatorMotor = new SparkMax(15,MotorType.kBrushless);
+    SparkMaxConfig globalConfig = new SparkMaxConfig();
+    globalConfig.smartCurrentLimit(50).idleMode(IdleMode.kBrake);
+    elevatorMotor.configure(globalConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
   }
 
   @Override
@@ -87,7 +110,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    if (operator.getRawButton(PS4Controller.Button.kCircle.value)){
+
+    //torquer
+    if (driver.getRawButton(PS4Controller.Button.kCircle.value)){
       Torquer.set(.25);
     }else if (driver.getRawButton(PS4Controller.Button.kSquare.value)){
       Torquer.set(-.25);
@@ -95,72 +120,63 @@ public class Robot extends TimedRobot {
       Torquer.stopMotor();
     }
 //algae buttons
-    if (operator.getRawButton(PS4Controller.Button.kR1.value)) {
-      Algae.set(.25);
-    } else if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
-      Algae.set(-.25);
+    if (driver.getRawButton(PS4Controller.Button.kR1.value)) {
+      Algae.set(.9);
+    } else if (driver.getRawButton(PS4Controller.Button.kR2.value)) {
+      Algae.set(-.9);
     }else {
       Algae.stopMotor();
     }
-    if (driver.getRawButton(PS4Controller.Button.kTriangle.value)) {
-      AlgaeArm.set(.25);
-    }else if (driver.getRawButton(PS4Controller.Button.kCross.value)) {
-     AlgaeArm.set(-.25); 
+    if (operator.getRawButton(PS4Controller.Button.kTriangle.value)) {
+      AlgaeArm.set(.55);
+    }else if (operator.getRawButton(PS4Controller.Button.kCross.value)) {
+     AlgaeArm.set(-.55); 
     }else {
       AlgaeArm.stopMotor();
     }
     
 //coral buttons
-    if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
-      Piranha.set(.25);
-    }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
-      Piranha.set(-.25);
+    if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
+      Piranha.set(.50);
+    }else if (driver.getRawButton(PS4Controller.Button.kL1.value)) {
+      Piranha.set(-.50);
     }else {
       Piranha.stopMotor();
     }
 
 //wrist buttons
-    if (operator.getRawButton(PS4Controller.Button.kCross.value)) {
-    Wrist.set(.25);
-    // Timer timer = new Timer();
-    // timer.start();
-    // while (timer1.get() < 2) {
-    //   Wrist.set(.25);
-    //   wait(50);
-    // }
-
-    // Wrist.stopMotor();
-    // timer1.stop();
-    // timer1.reset();
+    if (operator.getRawButton(PS4Controller.Button.kSquare.value)) {
+    Wrist.set(.75);
     }else if (operator.getRawButton(PS4Controller.Button.kCircle.value)) {
-      Wrist.set(-.25);
+      Wrist.set(-.75);
     }else {
       Wrist.stopMotor();
     }
 
 //elevator buttons
-    if (driver.getRawButton(PS4Controller.Button.kL1.value)) {
-      Elevator.set(.25);
-      // Timer timer2 = new Timer();
+    if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
+      elevatorMotor.set(.75);
+          }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
+      elevatorMotor.set(-.75);
+    }// Timer timer2 = new Timer();
       // timer2.start();
       
       // while (timer2.get() < 2) {
       //   Elevator.set(.25);
       //   wait(50);
       // }
-  
+      
       // Elevator.stopMotor();
       // timer2.stop();
       // timer2.reset();
-    }else if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
-      Elevator.set(-.25);
-    }else {
-      Elevator.stopMotor();
+else {
+      elevatorMotor.stopMotor();
     }
 
 //skull crusher buttons
-    if (operator.getRawButton(PS4Controller.Button.kSquare.value)) {
-      Skullcrusher.set(.25);
+    if (operator.getRawButton(PS4Controller.Button.kR1.value)) {
+      
+      Skullcrusher.set(-.55);
       // Timer timer3 = new Timer();
       // timer3.start();
   
@@ -172,8 +188,8 @@ public class Robot extends TimedRobot {
       // Skullcrusher.stopMotor();
       // timer3.stop();
       // timer3.reset();
-    }else if (operator.getRawButton(PS4Controller.Button.kTriangle.value)) {
-      Skullcrusher.set(-.25);
+    }else if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
+      Skullcrusher.set(.55);
     }else {
       Skullcrusher.stopMotor();
     }

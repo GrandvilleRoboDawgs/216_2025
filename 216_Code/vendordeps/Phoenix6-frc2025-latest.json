@@ -30,7 +30,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "linuxathena"
@@ -44,7 +44,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "linuxathena"
@@ -58,7 +58,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -72,7 +72,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -86,7 +86,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -100,7 +100,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -114,7 +114,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -128,7 +128,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -142,7 +142,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -156,7 +156,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -170,7 +170,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -184,7 +184,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -198,7 +198,7 @@
             "isJar": false,
             "skipInvalidPlatforms": true,
             "validPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -216,7 +216,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "linuxathena"
@@ -232,7 +232,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "linuxathena"
@@ -248,7 +248,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -264,7 +264,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -280,7 +280,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -296,7 +296,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -312,7 +312,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -328,7 +328,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -344,7 +344,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -360,7 +360,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -376,7 +376,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -392,7 +392,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
@@ -408,7 +408,7 @@
             "sharedLibrary": true,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "windowsx86-64",
+                "//comment",
                 "linuxx86-64",
                 "linuxarm64",
                 "osxuniversal"
