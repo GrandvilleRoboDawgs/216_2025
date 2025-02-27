@@ -136,9 +136,9 @@ public class Robot extends TimedRobot {
     }
     
 //coral buttons
-    if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
+    if (driver.getRawButton(PS4Controller.Button.kL1.value)) {
       Piranha.set(.50);
-    }else if (driver.getRawButton(PS4Controller.Button.kL1.value)) {
+    }else if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
       Piranha.set(-.50);
     }else {
       Piranha.stopMotor();
@@ -155,6 +155,7 @@ public class Robot extends TimedRobot {
 
 //elevator buttons
     if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
+      System.out.println("Input recieved:Wrist");
       elevatorMotor.set(.75);
           }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
       elevatorMotor.set(-.75);
