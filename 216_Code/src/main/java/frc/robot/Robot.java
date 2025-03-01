@@ -2,6 +2,9 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license f
 package frc.robot;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.TimedRobot;
 
 import static edu.wpi.first.units.Units.Value;
 
@@ -10,17 +13,17 @@ import javax.lang.model.util.ElementScanner14;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.cameraserver.CameraServer;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -39,6 +42,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 
 public class Robot extends TimedRobot {
+  UsbCamera camera1;
+  UsbCamera camera2;
+  NetworkTableEntry cameraSelection;
   private final Joystick operator = new Joystick(0);
   private final Joystick driver = new Joystick(1);
   Spark Piranha = new Spark(8);
@@ -48,6 +54,9 @@ public class Robot extends TimedRobot {
   TalonFX Torquer = new TalonFX(13);
   TalonFX AlgaeArm = new TalonFX(14);
   SparkMax elevatorMotor;
+    // private int desiredLevel_elevator = 0; 
+  // private int desiredLevel_wrist = 0;
+ // private int desiredLevel_skullcrusher=0;
 
 
   // // private CANSparkMax Elevator;
