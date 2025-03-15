@@ -47,6 +47,8 @@ public class Robot extends TimedRobot {
   double aTarget = armPos[0];
   double eTarget = elevatorPos[0];
   double kPWrist = 1;
+  double kPArm = 2.25;
+  double kPElevator = .005;
   UsbCamera camera1;
   NetworkTableEntry cameraSelection;
   private final Joystick operator = new Joystick(0);
@@ -151,16 +153,12 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     // double currArmPos = skullcrushEncoder.get();
     // double currWirstPos = wristEncoder.get();
-  
-    System.out.println("Wrist encoder: " + wristEncoder.isConnected());
-    System.out.println("skullcrusher Encoder: " + skullcrushEncoder.isConnected());
-    System.out.println("Wrist encoder: " + wristEncoder.get());
-    System.out.println("skullcrusher Encoder: " + skullcrushEncoder.get());
-    System.out.println("Elevator Encoder: " + elevatorEncoder.getDistance());
     double currWristPos = wristEncoder.get();
-    double wristError = currWristPos - wTarget;
     double currArmPos = skullcrushEncoder.get();
     double currElevPos = elevatorEncoder.getDistance();
+    double wristError = Math.abs(currWristPos - wTarget);
+    double armError = Math.abs(currArmPos - aTarget);
+    double elevError = Math.abs(currElevPos - eTarget);
     //torquer
     if (driver.getRawButton(PS4Controller.Button.kCircle.value)){
       Torquer.set(.25);
@@ -182,7 +180,7 @@ public class Robot extends TimedRobot {
     }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
       AlgaeArm.set(-.25); 
     }else {
-      AlgaeArm.stopMotor();
+      AlgaeArm.set(-.05);
     }
     
 //coral buttons
@@ -194,6 +192,8 @@ public class Robot extends TimedRobot {
       Piranha.stopMotor();
     }
 
+
+    //macros
     if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
       //loading
       wTarget = wristPos[1];
@@ -222,25 +222,25 @@ public class Robot extends TimedRobot {
     }
 
     if(wTarget - .05 > currWristPos){
-      Wrist.set(wristError *kPWrist);
+      Wrist.set(-wristError * kPWrist);
     } else if (wTarget + .05 < currWristPos){
-      Wrist.set(-wristError *kPWrist);
+      Wrist.set(wristError * kPWrist);
     } else {
       Wrist.stopMotor();
     }
 
-    if(eTarget - 50 > currElevPos){
-      elevatorMotor.set(-.5); //down
-    } else if(eTarget + 50 < currElevPos){
-      elevatorMotor.set(.5); //up
+    if(eTarget - 30 > currElevPos){
+      elevatorMotor.set(-elevError * kPElevator); //down
+    } else if(eTarget + 30 < currElevPos){
+      elevatorMotor.set(elevError * kPElevator); //up
     } else{
       elevatorMotor.stopMotor(); 
     }
 
     if(aTarget - .1 > currArmPos){
-      Skullcrusher.set(-.5);
+      Skullcrusher.set(-kPArm * armError);
     } else if(aTarget + .1 < currArmPos){
-      Skullcrusher.set(.5);
+      Skullcrusher.set(kPArm * armError);
     } else {
       Skullcrusher.set(.15);
     }
