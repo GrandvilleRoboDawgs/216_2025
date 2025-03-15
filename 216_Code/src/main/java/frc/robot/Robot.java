@@ -2,10 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license f
 package frc.robot;
+import org.opencv.core.Mat.Atable;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import edu.wpi.first.wpilibj.Timer;
 // import com.revrobotics.spark.SparkMax;
 // import com.revrobotics.spark.SparkBase;
 // import com.revrobotics.spark.SparkFlex;
@@ -13,10 +16,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
@@ -33,7 +36,17 @@ import edu.wpi.first.math.controller.PIDController;
 
 
 public class Robot extends TimedRobot {
-
+  boolean starttimer = false;
+  int wristlevel = 0;
+  Timer wristtTimer = new Timer();
+  //constants for arm/wrsit
+  double[] armPos = {2.55, 2.7};
+  double[] wristPos = {1.28, 1.8, 2.2, 2.5};
+  double[] elevatorPos = {5, 4000, 10662};
+  double wTarget = wristPos[0];
+  double aTarget = armPos[0];
+  double eTarget = elevatorPos[0];
+  double kPWrist = 1;
   UsbCamera camera1;
   NetworkTableEntry cameraSelection;
   private final Joystick operator = new Joystick(0);
@@ -50,9 +63,10 @@ public class Robot extends TimedRobot {
   double Ki = 0;
   double Kd = 0;
   //encoders
-    DutyCycleEncoder elevatoreEncoder = new DutyCycleEncoder(5);
-    DutyCycleEncoder wristEncoder = new DutyCycleEncoder(6);
-    DutyCycleEncoder skullcrushEncoder = new DutyCycleEncoder(2);
+    private final Encoder elevatorEncoder = new Encoder(3, 4, false, Encoder.EncodingType.k2X);//normally 4,5
+    //absolute encoder
+    private final DutyCycleEncoder wristEncoder = new DutyCycleEncoder(5, 4.0, 0.0);
+    private final DutyCycleEncoder skullcrushEncoder = new DutyCycleEncoder(9,4.0,0.0);
     //auton selector
     private static final String kDefaultAuto = "Default";
     private static final String kCustomAuto = "My Auto";
@@ -67,7 +81,6 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     //elevatorEncoder.reset();
-
     m_robotContainer = new RobotContainer();
     elevatorMotor = new SparkMax(15,MotorType.kBrushless);
     SparkMaxConfig globalConfig = new SparkMaxConfig();
@@ -77,11 +90,16 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    // initializing array
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run(); 
+    //SmartDashboard.putNumber("Elevator", wristEncoder.get());
+    SmartDashboard.putNumber("Elevator Encoder", elevatorEncoder.getDistance());
+    SmartDashboard.putNumber("Wrist Encoder", wristEncoder.get());
+    SmartDashboard.putNumber("Arm Encoder", skullcrushEncoder.get());
   }
 
   @Override
@@ -100,6 +118,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+
   }
 
   @Override
@@ -123,14 +143,24 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
-    }
-  }
+    } 
+    elevatorEncoder.reset();
+   }
 
   @Override
   public void teleopPeriodic() {
+    // double currArmPos = skullcrushEncoder.get();
+    // double currWirstPos = wristEncoder.get();
+  
+    System.out.println("Wrist encoder: " + wristEncoder.isConnected());
+    System.out.println("skullcrusher Encoder: " + skullcrushEncoder.isConnected());
     System.out.println("Wrist encoder: " + wristEncoder.get());
-    System.out.println("Elevator encoder: " + elevatoreEncoder.get());
-
+    System.out.println("skullcrusher Encoder: " + skullcrushEncoder.get());
+    System.out.println("Elevator Encoder: " + elevatorEncoder.getDistance());
+    double currWristPos = wristEncoder.get();
+    double wristError = currWristPos - wTarget;
+    double currArmPos = skullcrushEncoder.get();
+    double currElevPos = elevatorEncoder.getDistance();
     //torquer
     if (driver.getRawButton(PS4Controller.Button.kCircle.value)){
       Torquer.set(.25);
@@ -141,16 +171,16 @@ public class Robot extends TimedRobot {
     }
 //algae buttons
     if (driver.getRawButton(PS4Controller.Button.kR1.value)) {
-      Algae.set(.5);
+      Algae.set(.9);
     } else if (driver.getRawButton(PS4Controller.Button.kR2.value)) {
-      Algae.set(-.5);
+      Algae.set(-.9);
     }else {
       Algae.stopMotor();
     }
-    if (operator.getRawButton(PS4Controller.Button.kTriangle.value)) {
+    if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
       AlgaeArm.set(.25);
-    }else if (operator.getRawButton(PS4Controller.Button.kCross.value)) {
-     AlgaeArm.set(-.25); 
+    }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
+      AlgaeArm.set(-.25); 
     }else {
       AlgaeArm.stopMotor();
     }
@@ -164,31 +194,165 @@ public class Robot extends TimedRobot {
       Piranha.stopMotor();
     }
 
-//wrist buttons
-    if (operator.getRawButton(PS4Controller.Button.kSquare.value)) {
-    Wrist.set(.35);
-    }else if (operator.getRawButton(PS4Controller.Button.kCircle.value)) {
-      Wrist.set(-.35);
-    }else {
-      Wrist.set(.05);
+    if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
+      //loading
+      wTarget = wristPos[1];
+      aTarget = armPos[0];
+      eTarget = elevatorPos[0];
+    } else if (operator.getRawButton(PS4Controller.Button.kSquare.value)){
+      //passive
+      wTarget = wristPos[0];
+      aTarget = armPos[0];
+      eTarget = elevatorPos[0];
+    } else if (operator.getRawButton(PS4Controller.Button.kCross.value)){
+      //L2
+      wTarget = wristPos[3];
+      aTarget =  armPos[0];
+      eTarget = elevatorPos[1];
+    } else if (operator.getRawButton(PS4Controller.Button.kCircle.value)){
+      //L1
+      wTarget = wristPos[2];
+      aTarget = armPos[0];
+      eTarget = elevatorPos[0];
+    } else if (operator.getRawButton(PS4Controller.Button.kR1.value)){
+      //l3
+      wTarget = wristPos[3];
+      aTarget = armPos[0];
+      eTarget = elevatorPos[2];
     }
+
+    if(wTarget - .05 > currWristPos){
+      Wrist.set(wristError *kPWrist);
+    } else if (wTarget + .05 < currWristPos){
+      Wrist.set(-wristError *kPWrist);
+    } else {
+      Wrist.stopMotor();
+    }
+
+    if(eTarget - 50 > currElevPos){
+      elevatorMotor.set(-.5); //down
+    } else if(eTarget + 50 < currElevPos){
+      elevatorMotor.set(.5); //up
+    } else{
+      elevatorMotor.stopMotor(); 
+    }
+
+    if(aTarget - .1 > currArmPos){
+      Skullcrusher.set(-.5);
+    } else if(aTarget + .1 < currArmPos){
+      Skullcrusher.set(.5);
+    } else {
+      Skullcrusher.set(.15);
+    }
+
+
+
+    // if (operator.getRawButton(PS4Controller.Button.kSquare.value)){
+    // if (wristtTimer.get() < .3){
+    //   if (starttimer){
+    //     wristlevel = 1;
+    //     wristtTimer.start();
+    //     starttimer = false;
+        
+    //    } Wrist.set(.25);
+    //   // } else if (wristtTimer.get() >= 1 && wristtTimer.get() < 1.5){
+    //   //   Wrist.set(.15);
+    //   // }
+    // }
+    // if (wristlevel == 1){
+    //   if (wristtTimer.get() < .21 && starttimer == true){
+    //     starttimer = false;
+    //     Wrist.set(.25);
+    //   } else{
+    //     Wrist.set(-.05);
+    //   }
+    // }
+
+    // if (wTarget - .1 > currWirstPos){
+    //   Wrist.set(.3);
+    // } else if(wTarget + .1 < currWirstPos){
+    //   Wrist.set(-.3);
+    // } else {
+    //   Wrist.stopMotor();
+    // }
+      // System.out.println("Wrist encoder: " + wristEncoder.get());
+
+    // if(aTarget - .02 < currArmPos){
+    //   Skullcrusher.set(.5);
+    // } else if(aTarget + .02 > currArmPos){
+    //   Skullcrusher.set(-.5);
+    // } else {
+    //   Skullcrusher.stopMotor();
+    // }
+
+//wrist buttons
+    // if (operator.getRawButton(PS4Controller.Button.kSquare.value)) {
+    //   Wrist.set(.35);
+    //   //   if (wristEncoder.get() < 0.1 ) {
+    //   //     Wrist.set(.3);
+    //   // } else if (wristEncoder.get() >= 0.1) {
+    //   //     Wrist.set(.2);
+    //   // } else if (wristEncoder.get() > 0.3 && wristEncoder.get() < 0.5) {
+    //   //     Wrist.set(0.05);
+    //   // }
+    // }else if (operator.getRawButton(PS4Controller.Button.kCircle.value)) {
+    //   Wrist.set(-.35);
+    // }else {
+    //   Wrist.set(.05);
+    // }
 
     //wrist encoder with PID
   //   if (operator.getRawButton(PS4Controller.Button.kSquare.value)) {
   //     Wrist.set(pid.calculate(wristEncoder.get(), 0.15));
   // }
     
-    
+   // arm pos 1
+    // if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
+    //   if (  < .1 ) {
+    //     Wrist.set(.85);
+    // } else if (offsetValueEncoderWrist > .13) {
+    //     Wrist.set(.2);
+    // } else if (offsetValueEncoderWrist > .135 && offsetValueEncoderWrist < .145) {
+    //     Wrist.set(0.05);
+    // }
+    //   if (elevatorEncoder.get() < 1000){
+    //     elevatorMotor.set(-.5); //elevator is opposite for whatever reason
+    //   }else if (elevatoreEncoder.get() > 1200){
+    //     elevatorMotor.set(-.25);
+    //   } else if (elevatoreEncoder.get() >1000 && elevatoreEncoder.get() < 1400){
+    //     elevatorMotor.set(.05);
+    //   }
+    //   if (skullcrushEncoder.get() < .3){
+    //     Skullcrusher.set(.75);
+    //   }else if (skullcrushEncoder.get() > .45){
+    //     Skullcrusher.set(.4);
+    //   } else if (skullcrushEncoder.get() > .6){
+    //     Skullcrusher.set(.18);
+    //   }
+    // }
 //elevator buttons
         
-if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
-  elevatorMotor.set(.50);
-}
-else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
-    elevatorMotor.set(-.50);
-} else{
-  elevatorMotor.set(0.01);
-}
+// if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
+//   elevatorMotor.set(.50);
+// } else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
+//     elevatorMotor.set(-.50);
+// } else{
+//   elevatorMotor.stopMotor();
+// }
+//     if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
+//         if (elevatorEncoder.get() < 4 ) {
+//           elevatorMotor.set(-.7);
+//       } else if (elevatorEncoder.get() >= 7) {
+//           elevatorMotor.set(-.4);
+//       } else if (elevatorEncoder.get() > 0.3 && elevatorEncoder.get() < 0.5) {
+//           elevatorMotor.set(-0.01);
+//       }
+//     }else if (operator.getRawButton(PS4Controller.Button.kCircle.value)) {
+//       Wrist.set(-.35);
+//     }else {
+//       Wrist.set(.05);
+//     }
+
 //elevator with PID:
   //   if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
   //     elevatorEncoder.set(pid.calculate(elevatorEncoder.get(), 100));
@@ -204,14 +368,14 @@ else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
 // }
 
 //skull crusher buttons
-    if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
+    // if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
       
-      Skullcrusher.set(.55);
-    }else if (operator.getRawButton(PS4Controller.Button.kR1.value)) {
-      Skullcrusher.set(-.55);
-    }else {
-      Skullcrusher.set(0.18);;
-    }
+    //   Skullcrusher.set(.55);
+    // }else if (operator.getRawButton(PS4Controller.Button.kR1.value)) {
+    //   Skullcrusher.set(-.55);
+    // }else {
+    //   Skullcrusher.set(0.18);;
+    // }
     //   //skullcrusher encoder
     //   if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
     //     if (skullcrushEncoder.get() < 0.1 ) {

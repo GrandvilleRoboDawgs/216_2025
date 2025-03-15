@@ -73,5 +73,13 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return Commands.print("No autonomous command configured");
+            // drivetrain.applyRequest(()->
+            // drive.withVelocityX(0)
+            // .withVelocityY(.25*MaxSpeed)
+            // .withRotationalRate(0)).withTimeout(1.2),
+            // drivetrain.applyRequest(()->
+            // drive.withVelocityX(0)
+            // .withVelocityY(0)
+            // .withRotationalRate(0)).withTimeout(10);
     }
 }
