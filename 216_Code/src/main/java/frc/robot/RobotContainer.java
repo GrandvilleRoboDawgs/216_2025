@@ -12,6 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -72,14 +73,16 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
-            // drivetrain.applyRequest(()->
-            // drive.withVelocityX(0)
-            // .withVelocityY(.25*MaxSpeed)
-            // .withRotationalRate(0)).withTimeout(1.2),
-            // drivetrain.applyRequest(()->
-            // drive.withVelocityX(0)
-            // .withVelocityY(0)
-            // .withRotationalRate(0)).withTimeout(10);
+        //return Commands.print("No autonomous command configured");
+        return new SequentialCommandGroup(
+            drivetrain.applyRequest(()->
+            //drive.withVelocityX(.25*MaxSpeed) //blue
+            drive.withVelocityX(-.25*MaxSpeed) //red
+            .withVelocityY(0)
+            .withRotationalRate(0)).withTimeout(1.5),
+            drivetrain.applyRequest(()->
+            drive.withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(0)).withTimeout(10));
     }
 }
