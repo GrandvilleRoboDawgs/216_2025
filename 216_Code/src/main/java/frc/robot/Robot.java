@@ -43,18 +43,18 @@ public class Robot extends TimedRobot {
   int wristlevel = 0;
   Timer timer = new Timer();
   //constants for arm/wrsit
-  double[] armPos = {2.55, 2.85, 2.7};
-  double[] wristPos = {1.2, 1.85, 2.25, 2.4, 2.5};
-  double[] elevatorPos = {0, 4300, 10762, 17000};
-  double[] algaePos = {2.4, 3.2};
+  double[] armPos = {2.55, 3, 2.20, 2.4, 2.8};
+  double[] wristPos = {1.1, 1.9, 2.1, 2.25,2};
+  double[] elevatorPos = {-10, 1200, 7900, 18350};
+  double[] algaePos = {2.40, 2.8, 2.55};
   double wTarget = wristPos[0];
-  double aTarget = armPos[0];
+  double aTarget = armPos[4];
   double eTarget = elevatorPos[0];
   double alTarget = algaePos[0]; 
   double kPWrist = 1;
-  double kPArm = 2.8;
+  double kPArm = 3;
   double kPElevator = .0005;
-  double kPAlgae = .15;
+  double kPAlgae = .3;
   UsbCamera camera1;
   NetworkTableEntry cameraSelection;
   private final Joystick operator = new Joystick(0);
@@ -73,7 +73,7 @@ public class Robot extends TimedRobot {
   //encoders
     private final Encoder elevatorEncoder = new Encoder(3, 4, false, Encoder.EncodingType.k2X);//normally 4,5
     //absolute encoder
-    private final DutyCycleEncoder wristEncoder = new DutyCycleEncoder(5, 4.0, 0.0);
+    private final DutyCycleEncoder wristEncoder = new DutyCycleEncoder(5, 4.0, 3.0);
     private final DutyCycleEncoder skullcrushEncoder = new DutyCycleEncoder(9,4.0,0.0);
     private final DutyCycleEncoder algaeEncoder = new DutyCycleEncoder(1, 4.0, 1.0);
     //auton selector
@@ -108,6 +108,7 @@ public class Robot extends TimedRobot {
     //SmartDashboard.putNumber("Elevator", wristEncoder.get());
     SmartDashboard.putNumber("Elevator Encoder", elevatorEncoder.getDistance());
     SmartDashboard.putNumber("Wrist Encoder", wristEncoder.get());
+    SmartDashboard.putNumber("ALgae Encoder", algaeEncoder.get());
     SmartDashboard.putNumber("Arm Encoder", skullcrushEncoder.get());
 
   }
@@ -148,11 +149,25 @@ public class Robot extends TimedRobot {
     double currWristPos = wristEncoder.get();
     double wristError = Math.abs(currWristPos - wTarget);
 
-    if(timer.get() > 2 && timer.get() < 5){
-      wTarget = wristPos[3];
+    if(timer.get() > 2 && timer.get() < 9){
+      wTarget = wristPos[4];
     } else {
       wTarget = wristPos[0];
     }
+
+    if(timer.get() > 4){
+      Piranha.set(.3);
+    } else {
+      Piranha.set(0);
+    }
+
+    // if(alTarget - .1 > currAlgaePos){
+    //   AlgaeArm.set(kPAlgae * algaeError);
+    // } else if(alTarget + .1 < currAlgaePos){
+    //   AlgaeArm.set(-kPAlgae * algaeError);
+    // } else {
+    //   AlgaeArm.stopMotor();
+    // }
 
     if(wTarget - .05 > currWristPos){
       Wrist.set(wristError * kPWrist / 2);
@@ -186,7 +201,7 @@ public class Robot extends TimedRobot {
     double armError = Math.abs(currArmPos - aTarget);
     double elevError = Math.abs(currElevPos - eTarget);
     double algaeError = Math.abs(currAlgaePos - alTarget);
-    // System.out.println(skullcrushEncoder.get());
+
     // System.out.println(skullcrushEncoder.isConnected());
     // System.out.println(armError);
 
@@ -200,12 +215,19 @@ public class Robot extends TimedRobot {
     }
 //algae buttons
     if (driver.getRawButton(PS4Controller.Button.kR1.value)) {
-      Algae.set(.9);
+      Algae.set(1);
     } else if (driver.getRawButton(PS4Controller.Button.kR2.value)) {
-      Algae.set(-.9);
+      Algae.set(-1);
     }else {
       Algae.stopMotor();
     }
+    // if (driver.getPOV() == 0) {
+    //   Algae.set(1);
+    // } else if (driver.getPOV() == 180) {
+    //   Algae.set(-1);
+    // }else {
+    //   Algae.stopMotor();
+    // }
     // if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
     //   AlgaeArm.set(.25);
     // }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
@@ -213,57 +235,58 @@ public class Robot extends TimedRobot {
     // }else {
     //   AlgaeArm.set(-.01);
     // }
-    if (operator.getRawButton(PS4Controller.Button.kL1.value)) {
+    if (operator.getRawButton(PS4Controller.Button.kR1.value)) {
       alTarget = algaePos[0];
-    }else if (operator.getRawButton(PS4Controller.Button.kL2.value)) {
+    }else if (operator.getRawButton(PS4Controller.Button.kR2.value)) {
       alTarget = algaePos[1];
     }
     
 //coral buttons
     if (driver.getRawButton(PS4Controller.Button.kTriangle.value)) {
-      Piranha.set(.50);
+      Piranha.set(.75);
     }else if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
-      Piranha.set(-.50);
+      Piranha.set(-.75);
     }else {
       Piranha.stopMotor();
     }
 
 
     //macros
-    if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
+    if (operator.getRawButton(PS4Controller.Button.kCross.value)){
       //loading
-      wTarget = wristPos[1];
-      aTarget = armPos[0];
-      eTarget = elevatorPos[0];
-    } else if (operator.getRawButton(PS4Controller.Button.kSquare.value)){
-      //passive
       wTarget = wristPos[0];
-      aTarget = armPos[0];
+      aTarget = armPos[4];
       eTarget = elevatorPos[0];
-    } else if (operator.getRawButton(PS4Controller.Button.kCross.value)){
+    } else if (operator.getRawButton(PS4Controller.Button.kOptions.value)){
+      //hang
+      wTarget = wristPos[2];
+      aTarget = armPos[2];
+      eTarget = elevatorPos[0];
+    } else if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
       //L2
-      wTarget = wristPos[3];
+      wTarget = wristPos[1];
       aTarget =  armPos[0];
       eTarget = elevatorPos[1];
-    } else if (operator.getRawButton(PS4Controller.Button.kCircle.value)){
+    } else if (operator.getRawButton(PS4Controller.Button.kSquare.value)){
       //L1
-      wTarget = wristPos[2];
-      aTarget = armPos[0];
+      wTarget = wristPos[1];
+      aTarget = armPos[4];
       eTarget = elevatorPos[0];
-    } else if (operator.getRawButton(PS4Controller.Button.kR1.value)){
+    } else if (operator.getRawButton(PS4Controller.Button.kCircle.value)){
       //l3
-      wTarget = wristPos[3];
+      wTarget = wristPos[1];
       aTarget = armPos[0];
       eTarget = elevatorPos[2];
-    } else if (operator.getRawButton(PS4Controller.Button.kR2.value)){
-      //algae
-      wTarget = wristPos[1];
-      aTarget = armPos[1];
-      eTarget = elevatorPos[1];
-    } else if (operator.getRawButton(PS4Controller.Button.kOptions.value)){
+    } //else if (operator.getRawButton(PS4Controller.Button.kOptions.value)){
+    //   //algae
+    //   wTarget = wristPos[1];
+    //   aTarget = armPos[1];
+    //   eTarget = elevatorPos[2];
+    // } 
+    else if (operator.getRawButton(PS4Controller.Button.kL2.value)){
       //L4
-      wTarget = wristPos[4];
-      aTarget = armPos[0];
+      wTarget = wristPos[2];
+      aTarget = armPos[3];
       eTarget = elevatorPos[3];
     }
 
@@ -305,26 +328,7 @@ public class Robot extends TimedRobot {
 
 
 
-    // if (operator.getRawButton(PS4Controller.Button.kSquare.value)){
-    // if (wristtTimer.get() < .3){
-    //   if (starttimer){
-    //     wristlevel = 1;
-    //     wristtTimer.start();
-    //     starttimer = false;
-        
-    //    } Wrist.set(.25);
-    //   // } else if (wristtTimer.get() >= 1 && wristtTimer.get() < 1.5){
-    //   //   Wrist.set(.15);
-    //   // }
-    // }
-    // if (wristlevel == 1){
-    //   if (wristtTimer.get() < .21 && starttimer == true){
-    //     starttimer = false;
-    //     Wrist.set(.25);
-    //   } else{
-    //     Wrist.set(-.05);
-    //   }
-    // }
+  
 
     // if (wTarget - .1 > currWirstPos){
     //   Wrist.set(.3);

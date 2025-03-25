@@ -76,13 +76,14 @@ public class RobotContainer {
         //return Commands.print("No autonomous command configured");
         return new SequentialCommandGroup(
             drivetrain.applyRequest(()->
-            //drive.withVelocityX(.25*MaxSpeed) //blue
-            drive.withVelocityX(-.25*MaxSpeed) //red
+            drive.withVelocityX(.25*MaxSpeed) //blue
+            // drive.withVelocityX(-.25*MaxSpeed) //red
             .withVelocityY(0)
-            .withRotationalRate(0)).withTimeout(1.5),
+            .withRotationalRate(0)).withTimeout(2),
             drivetrain.applyRequest(()->
             drive.withVelocityX(0)
             .withVelocityY(0)
             .withRotationalRate(0)).withTimeout(10));
     }
+    
 }
