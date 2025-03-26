@@ -37,21 +37,21 @@ import edu.wpi.first.math.controller.PIDController;
 
 
 
-
 public class Robot extends TimedRobot {
   boolean starttimer = false;
+  boolean auto_selected;
   int wristlevel = 0;
   Timer timer = new Timer();
   //constants for arm/wrsit
   double[] armPos = {2.55, 3, 2.20, 2.4, 2.8};
-  double[] wristPos = {1.1, 1.9, 2.1, 2.25,2};
-  double[] elevatorPos = {-10, 1200, 7900, 18350};
-  double[] algaePos = {2.40, 2.8, 2.55};
+  double[] wristPos = {1.05, 1.95, 2.2, 2.25, 1.6,2.6};
+  double[] elevatorPos = {-10, 1200, 7900, 18350, 1500, 8300};
+  double[] algaePos = {2.40, 2.8, 2.55,3};
   double wTarget = wristPos[0];
   double aTarget = armPos[4];
   double eTarget = elevatorPos[0];
   double alTarget = algaePos[0]; 
-  double kPWrist = 1;
+  double kPWrist = .75;
   double kPArm = 3;
   double kPElevator = .0005;
   double kPAlgae = .3;
@@ -66,10 +66,6 @@ public class Robot extends TimedRobot {
   TalonFX Torquer = new TalonFX(13);
   TalonFX AlgaeArm = new TalonFX(14);
   SparkMax elevatorMotor;
-  // constants for PID
-  double kP = 0.1;
-  double Ki = 0;
-  double Kd = 0;
   //encoders
     private final Encoder elevatorEncoder = new Encoder(3, 4, false, Encoder.EncodingType.k2X);//normally 4,5
     //absolute encoder
@@ -77,8 +73,8 @@ public class Robot extends TimedRobot {
     private final DutyCycleEncoder skullcrushEncoder = new DutyCycleEncoder(9,4.0,0.0);
     private final DutyCycleEncoder algaeEncoder = new DutyCycleEncoder(1, 4.0, 1.0);
     //auton selector
-    private static final String kDefaultAuto = "Default";
-    private static final String kCustomAuto = "My Auto";
+    private static final String kDefaultAuto = "Red Auto";
+    private static final String kCustomAuto = "Blue Auto";
     private String m_autoSelected;
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private Command m_autonomousCommand;
@@ -86,7 +82,6 @@ public class Robot extends TimedRobot {
   // private final Joystick driver = new Joystick(1);
   // private final Drivetrain m_swerve = new Drivetrain();
   private final RobotContainer m_robotContainer;
-  PIDController pid = new PIDController(kP, Ki, Kd);
 
   public Robot() {
     //elevatorEncoder.reset();
@@ -96,10 +91,9 @@ public class Robot extends TimedRobot {
     globalConfig.smartCurrentLimit(50).idleMode(IdleMode.kBrake);
     elevatorMotor.configure(globalConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
     CameraServer.startAutomaticCapture();
-    // m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    // m_chooser.addOption("My Auto", kCustomAuto);
-    // SmartDashboard.putData("Auto choices", m_chooser);
-    // initializing array
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
   }
 
   @Override
@@ -126,7 +120,6 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     timer.reset();
     timer.start();
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -137,45 +130,54 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    // switch (m_autoSelected) {
-    //   case kCustomAuto:
-    //     // Put custom auto code here
-    //     break;
-    //   case kDefaultAuto:
-    //   default:
-    //     // Put default auto code here
-    //     break;
-    // }
-    double currWristPos = wristEncoder.get();
-    double wristError = Math.abs(currWristPos - wTarget);
-
-    if(timer.get() > 2 && timer.get() < 9){
-      wTarget = wristPos[4];
-    } else {
-      wTarget = wristPos[0];
+    switch (m_autoSelected) {
+      case kCustomAuto:
+      if (!auto_selected){
+        m_autonomousCommand = m_robotContainer.blueCommand();
+        m_autonomousCommand.schedule();
+        auto_selected = true;
+      }
+        // Put custom auto code here
+        break;
+      case kDefaultAuto:
+      default:
+      if (!auto_selected){
+        m_autonomousCommand = m_robotContainer.redCommand();
+        m_autonomousCommand.schedule();
+        auto_selected = true;
+      }
+        break;
     }
+    // double currWristPos = wristEncoder.get();
+    // double wristError = Math.abs(currWristPos - wTarget);
 
-    if(timer.get() > 4){
-      Piranha.set(.3);
-    } else {
-      Piranha.set(0);
-    }
-
-    // if(alTarget - .1 > currAlgaePos){
-    //   AlgaeArm.set(kPAlgae * algaeError);
-    // } else if(alTarget + .1 < currAlgaePos){
-    //   AlgaeArm.set(-kPAlgae * algaeError);
+    // if(timer.get() > 2 && timer.get() < 9){
+    //   wTarget = wristPos[4];
     // } else {
-    //   AlgaeArm.stopMotor();
+    //   wTarget = wristPos[0];
     // }
 
-    if(wTarget - .05 > currWristPos){
-      Wrist.set(wristError * kPWrist / 2);
-    } else if (wTarget + .05 < currWristPos){
-      Wrist.set(-wristError * kPWrist / 2);
-    } else {
-      Wrist.stopMotor();
-    }
+    // if(timer.get() > 4){
+    //   Piranha.set(.3);
+    // } else {
+    //   Piranha.set(0);
+    // }
+
+    // // if(alTarget - .1 > currAlgaePos){
+    // //   AlgaeArm.set(kPAlgae * algaeError);
+    // // } else if(alTarget + .1 < currAlgaePos){
+    // //   AlgaeArm.set(-kPAlgae * algaeError);
+    // // } else {
+    // //   AlgaeArm.stopMotor();
+    // // }
+
+    // if(wTarget - .05 > currWristPos){
+    //   Wrist.set(wristError * kPWrist / 2);
+    // } else if (wTarget + .05 < currWristPos){
+    //   Wrist.set(-wristError * kPWrist / 2);
+    // } else {
+    //   Wrist.stopMotor();
+    // }
   }
 
   @Override
@@ -186,7 +188,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel(); 
     } 
-    elevatorEncoder.reset();
+
    }
 
   @Override
@@ -202,9 +204,13 @@ public class Robot extends TimedRobot {
     double elevError = Math.abs(currElevPos - eTarget);
     double algaeError = Math.abs(currAlgaePos - alTarget);
 
-    // System.out.println(skullcrushEncoder.isConnected());
+    // System.out.println(wristEncoder.isConnected());
     // System.out.println(armError);
-
+    if (operator.getPOV() == 0){
+      eTarget = elevatorPos[5];
+      aTarget = armPos[4];
+      wTarget = wristPos[4];
+    }
     //torquer
     if (driver.getRawButton(PS4Controller.Button.kCircle.value)){
       Torquer.set(.25);
@@ -243,9 +249,9 @@ public class Robot extends TimedRobot {
     
 //coral buttons
     if (driver.getRawButton(PS4Controller.Button.kTriangle.value)) {
-      Piranha.set(.75);
+      Piranha.set(.75);//outtake
     }else if (driver.getRawButton(PS4Controller.Button.kL2.value)) {
-      Piranha.set(-.75);
+      Piranha.set(-.55);//intake
     }else {
       Piranha.stopMotor();
     }
@@ -259,9 +265,10 @@ public class Robot extends TimedRobot {
       eTarget = elevatorPos[0];
     } else if (operator.getRawButton(PS4Controller.Button.kOptions.value)){
       //hang
-      wTarget = wristPos[2];
-      aTarget = armPos[2];
+      wTarget = wristPos[5];
+      aTarget = armPos[4];
       eTarget = elevatorPos[0];
+      alTarget = algaePos[3];
     } else if (operator.getRawButton(PS4Controller.Button.kTriangle.value)){
       //L2
       wTarget = wristPos[1];

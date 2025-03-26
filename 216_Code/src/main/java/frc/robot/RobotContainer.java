@@ -72,7 +72,21 @@ public class RobotContainer {
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
-    public Command getAutonomousCommand() {
+    public Command redCommand() {
+        //return Commands.print("No autonomous command configured");
+        return new SequentialCommandGroup(
+            drivetrain.applyRequest(()->
+            // drive.withVelocityX(.25*MaxSpeed) //blue
+            drive.withVelocityX(-.25*MaxSpeed) //red
+            .withVelocityY(0)
+            .withRotationalRate(0)).withTimeout(2),
+            drivetrain.applyRequest(()->
+            drive.withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(0)).withTimeout(10));
+    }
+    
+    public Command blueCommand() {
         //return Commands.print("No autonomous command configured");
         return new SequentialCommandGroup(
             drivetrain.applyRequest(()->
