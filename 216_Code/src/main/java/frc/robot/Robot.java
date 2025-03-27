@@ -75,6 +75,7 @@ public class Robot extends TimedRobot {
     //auton selector
     private static final String kDefaultAuto = "Red Auto";
     private static final String kCustomAuto = "Blue Auto";
+    private static final String kredleftauto = "Red Left Auto";
     private String m_autoSelected;
     private final SendableChooser<String> m_chooser = new SendableChooser<>();
   private Command m_autonomousCommand;
@@ -91,8 +92,9 @@ public class Robot extends TimedRobot {
     globalConfig.smartCurrentLimit(50).idleMode(IdleMode.kBrake);
     elevatorMotor.configure(globalConfig,ResetMode.kResetSafeParameters,PersistMode.kPersistParameters);
     CameraServer.startAutomaticCapture();
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
+    m_chooser.setDefaultOption("Red Auto", kDefaultAuto);
+    m_chooser.addOption("Blue Auto", kCustomAuto);
+    m_chooser.addOption("Red Left Auto", kredleftauto);
     SmartDashboard.putData("Auto choices", m_chooser);
   }
 
@@ -120,10 +122,22 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     timer.reset();
     timer.start();
-
-    if (m_autonomousCommand != null) {
+    m_autoSelected =m_chooser.getSelected();
+    switch (m_autoSelected) {
+      case kCustomAuto:
+        m_autonomousCommand = m_robotContainer.blueCommand();
+        m_autonomousCommand.schedule();
+        break;
+      case kDefaultAuto:
+      default:
+        m_autonomousCommand = m_robotContainer.redCommand();
+        m_autonomousCommand.schedule();
+        break;
+      case kredleftauto:
+      m_autonomousCommand = m_robotContainer.redLeftAuto();
       m_autonomousCommand.schedule();
     }
+
 
 
   }
@@ -132,22 +146,119 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     switch (m_autoSelected) {
       case kCustomAuto:
-      if (!auto_selected){
-        m_autonomousCommand = m_robotContainer.blueCommand();
-        m_autonomousCommand.schedule();
-        auto_selected = true;
-      }
-        // Put custom auto code here
+      System.out.println("blue auto");
+      if(timer.get() >2.5&& timer.get() <= 5){
+        wTarget = wristPos[2];
+        aTarget = armPos[3];
+        eTarget = elevatorPos[3];
+          } 
+          if(timer.get() >6 && timer.get()<7){
+            Piranha.set(.55);
+              } 
+              if (timer.get() > 6.5 && timer.get() < 7.5){
+                wTarget = wristPos[1];
+                aTarget = armPos[0];
+                eTarget = elevatorPos[2];
+                Piranha.set(0);
+              }
+              if (timer.get() >8.5 && timer.get()<9.5){
+                wTarget = wristPos[0];
+                aTarget = armPos[4];
+                eTarget = elevatorPos[0];
+              }
+
         break;
       case kDefaultAuto:
+      System.out.println("red auto");
+      if(timer.get() >2.5&& timer.get() <= 5){
+        wTarget = wristPos[2];
+        aTarget = armPos[3];
+        eTarget = elevatorPos[3];
+          } 
+          if(timer.get() >6 && timer.get() < 7){
+            Piranha.set(.55);
+              } 
+              if (timer.get() > 7 && timer.get() < 8.2){
+                wTarget = wristPos[1];
+                aTarget = armPos[0];
+                eTarget = elevatorPos[2];
+                Piranha.set(0);
+              }
+              if (timer.get() >9 && timer.get()<10.5){
+                wTarget = wristPos[0];
+                aTarget = armPos[4];
+                eTarget = elevatorPos[0];
+
+              }
+
       default:
-      if (!auto_selected){
-        m_autonomousCommand = m_robotContainer.redCommand();
-        m_autonomousCommand.schedule();
-        auto_selected = true;
-      }
+      //code goes here
         break;
     }
+    double currAlgaePos = algaeEncoder.get();
+    double currWristPos = wristEncoder.get();
+    double currArmPos = skullcrushEncoder.get();
+    double currElevPos = elevatorEncoder.getDistance();
+    double wristError = Math.abs(currWristPos - wTarget);
+    double armError = Math.abs(currArmPos - aTarget);
+    double elevError = Math.abs(currElevPos - eTarget);
+    double algaeError = Math.abs(currAlgaePos - alTarget);
+
+    if(wTarget - .02 > currWristPos){
+      Wrist.set(wristError * kPWrist);
+    } else if (wTarget + .02 < currWristPos){
+      Wrist.set(-wristError * kPWrist);
+    } else {
+      Wrist.stopMotor();
+    }
+
+    if (driver.getRawButton(PS4Controller.Button.kCross.value)){
+      elevatorMotor.set(-.3);
+    } else if(eTarget - 25 > currElevPos){
+      elevatorMotor.set(-elevError * kPElevator); //up
+    } else if(eTarget + 25 < currElevPos){
+      elevatorMotor.set(elevError * kPElevator); //down
+    } else{
+      elevatorMotor.stopMotor(); 
+    }
+
+    if(aTarget - .05 > currArmPos){
+      Skullcrusher.set(-kPArm * armError);
+    } else if(aTarget + .05 < currArmPos){
+      Skullcrusher.set(kPArm * armError);
+    } else {
+      Skullcrusher.set(.15);
+    }
+
+    if(alTarget - .1 > currAlgaePos){
+      AlgaeArm.set(kPAlgae * algaeError);
+    } else if(alTarget + .1 < currAlgaePos){
+      AlgaeArm.set(-kPAlgae * algaeError);
+    } else {
+      AlgaeArm.stopMotor();
+    }
+    
+    // switch (m_autoSelected) {
+    //   case kCustomAuto:
+    //   if (!auto_selected){
+    //     m_autonomousCommand = m_robotContainer.blueCommand();
+
+    //     auto_selected = true;
+        
+    // System.out.println("red auto");
+    //   }
+    //     // Put custom auto code here
+    //     break;
+    //   case kDefaultAuto:
+    //   default:
+    //   if (!auto_selected){
+    //     m_autonomousCommand = m_robotContainer.redCommand();
+    //     m_autonomousCommand.schedule();
+    //     auto_selected = true;
+    //     System.out.println("blue auto");
+    //   }
+    //     break;
+    // }
     // double currWristPos = wristEncoder.get();
     // double wristError = Math.abs(currWristPos - wTarget);
 
@@ -181,14 +292,16 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    Skullcrusher.set(.15);
+  }
 
   @Override
   public void teleopInit() {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel(); 
     } 
-
+    Skullcrusher.set(.15);
    }
 
   @Override
@@ -204,7 +317,6 @@ public class Robot extends TimedRobot {
     double elevError = Math.abs(currElevPos - eTarget);
     double algaeError = Math.abs(currAlgaePos - alTarget);
 
-    // System.out.println(wristEncoder.isConnected());
     // System.out.println(armError);
     if (operator.getPOV() == 0){
       eTarget = elevatorPos[5];

@@ -79,25 +79,41 @@ public class RobotContainer {
             // drive.withVelocityX(.25*MaxSpeed) //blue
             drive.withVelocityX(-.25*MaxSpeed) //red
             .withVelocityY(0)
-            .withRotationalRate(0)).withTimeout(2),
+            .withRotationalRate(0)).withTimeout(1.225),
             drivetrain.applyRequest(()->
             drive.withVelocityX(0)
             .withVelocityY(0)
-            .withRotationalRate(0)).withTimeout(10));
+            .withRotationalRate(0)).withTimeout(9.5),
+            drivetrain.applyRequest(()->
+            drive.withVelocityX(.1*MaxSpeed)
+            .withVelocityY(0)
+            .withRotationalRate(.15*MaxAngularRate)).withTimeout(2));
+
     }
     
     public Command blueCommand() {
         //return Commands.print("No autonomous command configured");
         return new SequentialCommandGroup(
             drivetrain.applyRequest(()->
-            drive.withVelocityX(.25*MaxSpeed) //blue
-            // drive.withVelocityX(-.25*MaxSpeed) //red
+            // drive.withVelocityX(.25*MaxSpeed) //blue
+            drive.withVelocityX(.25*MaxSpeed) //red
             .withVelocityY(0)
-            .withRotationalRate(0)).withTimeout(2),
+            .withRotationalRate(0)).withTimeout(1.225),
             drivetrain.applyRequest(()->
             drive.withVelocityX(0)
             .withVelocityY(0)
-            .withRotationalRate(0)).withTimeout(10));
-    }
+            .withRotationalRate(0)).withTimeout(9.5));    }
+    public Command redLeftAuto() {
+        //return Commands.print("No autonomous command configured");
+        return new SequentialCommandGroup(
+            drivetrain.applyRequest(()->
+            // drive.withVelocityX(.25*MaxSpeed) //blue
+            drive.withVelocityX(-.35*MaxSpeed) //red
+            .withVelocityY(0)
+            .withRotationalRate(0.25 *MaxAngularRate)).withTimeout(1.225),
+            drivetrain.applyRequest(()->
+            drive.withVelocityX(-0.2*MaxSpeed)
+            .withVelocityY(0)
+            .withRotationalRate(-.1*MaxAngularRate)).withTimeout(0.6));    }
     
 }
